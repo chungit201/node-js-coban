@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-KyZXEAg3QhqLMpG8r+8fhAXLRk2vvoC2f3B09zVXn8CA5QIVfZOJ3BCsw2P0p/We" crossorigin="anonymous">
+</head>
+<style>
+   #form-add{
+       background-color: rgb(241, 232, 219);
+   }
+</style>
+<body>
+    <div class="container" style="margin-top: 200px;">
+        <div class="row">
+            <form id="search">
+                <input type="text" id="text-search">
+                <button >Search</button>
+            </form>
+            <div class="col-6">
+               
+              <form id="form-add" class="container form-group">
+                <h4>Form add</h4>
+                  <input type="text" placeholder="nhập title..." id="title" class="form-control "><br>
+                  <input type="text" placeholder="nhập desc..." id="desc" class="form-control"><br>
+                  <input type="text" placeholder="nhập img..." id="img" class="form-control"><br>
+                  <input type="text" placeholder="nhập author..." id="author" class="form-control"><br>
+                  <button class="btn btn-primary">submit</button>
+              </form>
+            </div>
+            <div class="col-6">
+              <table class="table ">
+                  <thead>
+                      <tr class="table-danger">
+                          <th>title</th>
+                          <th>desc</th>
+                          <th>img</th>
+                          <th>author</th>
+                          <th>Action</th>
+                      </tr>
+                  </thead>
+                  <tbody id="result">
+          
+                  </tbody>
+              </table>
+            </div>
+        </div>
+    </div>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.3/dist/umd/popper.min.js" integrity="sha384-eMNCOe7tC1doHpGoWe/6oMVemdAVTMs2xqW4mwXrXsW0L84Iytr2wi5v2QjrP/xp" crossorigin="anonymous"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.1.0/dist/js/bootstrap.min.js" integrity="sha384-cn7l7gDp0eyniUwwAZgrzD06kc/tftFf19TOAs2zVinnD/C7E91j9yyk5//jjpt/" crossorigin="anonymous"></script>
+    <script>
+        function searchDT(){
+            const valueSearch = document.getElementById('text-search');
+            const resultresultsearch = document.getElementById('result');
+            document.getElementById('search').addEventListener('submit',(e)=>{
+                e.preventDefault();
+               if(valueSearch.value){
+                
+                let urlsearch = `http://localhost:4400/api/search?title=${valueSearch.value}`;
+                fetch(urlsearch).then(response=>{
+                    return response.json();
+                }).then(data=>{
+                    console.log(data);
+                  if(data){
+                    resultresultsearch.innerHTML = ''
+                   data.map(value=>{
+                    const listsearch =    `
+                    <tr>
+                            <td>${value.title}</td>
+                            <td>${value.desc}</td>
+                            <td><img src="${value.img}" width=100px></td>
+                            <td>${value.author}</td>
+                            <td><a class="btn btn-primary" href="detail.html?id=${value._id}">edit</td>
+                              
+                        </tr>
+                    `
+                    resultresultsearch.innerHTML += listsearch
+                   })
+                  }
+                  if(data=[]){
+                    resultresultsearch.innerHTML = "Không tìm thấy sản phẩm"
+                    resultresultsearch.style.textAlign ="center"
+                  }
+                }).catch(err=>{
+                    console.log(err);
+                })
+               }else{
+                   window.location.reload();
+               }
+        
+            
+        })
+    }
+        function addProduct(){
+            document.getElementById('form-add').addEventListener('submit',(e)=>{
+                e.preventDefault();
+                const data ={
+                    title:document.getElementById('title').value,
+                    desc:document.getElementById('desc').value,
+                    img:document.getElementById('img').value,
+                    author:document.getElementById('author').value,
+                }
+         
+            let url = 'http://localhost:4400/api/books';
+            fetch(url,{
+                method: "POST",
+                headers:{
+                    'Content-type' : 'application/json'
+                },
+                body:JSON.stringify(data)
+            }).then(res=>res.json())
+                .then(data=>{
+                    console.log("succes:",data);
+                    window.location.reload();
+                })
+        });
+        }
+        const result = document.getElementById('result')
+        const get =async()=>{
+            
+            try{
+                searchDT();
+                addProduct();
+                const {data} =await axios.get('http://localhost:4400/api/books');
+                console.log(data);
+                data.map(value=>{
+                    const list = `
+                        <tr>
+                            <td>${value.title}</td>
+                            <td>${value.desc}</td>
+                            <td><img src="${value.img}" width=100px></td>
+                            <td>${value.author}</td>
+                            <td><a class="btn btn-primary" href="detail.html?id=${value._id}">edit</td>
+                              
+                        </tr>
+                    `
+                        result.innerHTML += list
+                })
+            }catch(err){
+                console.log(err);
+            }
+
+        }
+        get();
+    </script>
+</body>
+</html>
